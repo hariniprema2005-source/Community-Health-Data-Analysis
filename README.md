@@ -73,6 +73,7 @@ To engineer a responsive, centralized full-stack web application that allows hea
 | **Frontend** | HTML5, CSS3, ES6+ JavaScript | Fast, native browser performance without bulky Node/npm build steps; responsive grid and flexbox layout. |
 | **Visualizations** | Chart.js 4.4 | Crisp, interactive HTML5 canvas charts with responsive resizing and custom tooltips. |
 | **Icons & Fonts** | FontAwesome 6, Inter font | Clean, modern medical and dashboard UI aesthetic. |
+| **Flask** | A Flask-based web application for community health data collection, analysis, and visualization. |
 
 ---
 
@@ -235,3 +236,6 @@ When presenting this project to examiners or review panels, emphasize the follow
 
 ## 📄 License
 Academic Project — Free for learning, modification, and educational distribution.
+## Live Demo 
+ [Open Live Project] https://community-health-data-analysis.onrender.com
+
