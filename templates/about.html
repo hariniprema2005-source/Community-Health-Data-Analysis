@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}About Project{% endblock %}
+{% block breadcrumb %}About Project{% endblock %}
+
+{% block content %}
+<div class="page-title-bar">
+    <div class="page-title-box">
+        <h1>About the Project</h1>
+        <p>Project documentation, architectural design, academic review talking points, and ethical guidelines.</p>
+    </div>
+    <div class="page-title-actions">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+            <i class="fas fa-chart-pie"></i> Open Dashboard
+        </a>
+    </div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 1.75rem;">
+    <!-- Project Overview Card -->
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-book-bookmark"></i> Academic Project Title & Problem Statement</h3>
+            <span class="badge badge-secondary">Capstone / Internship Project</span>
+        </div>
+        <div class="card-body">
+            <h2 style="font-size: 1.35rem; font-weight: 800; color: #0f766e; margin-bottom: 0.75rem;">
+                Community Health Data Collection & Analysis
+            </h2>
+            <div style="margin-bottom: 1.25rem;">
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.35rem;">
+                    Problem Statement:
+                </h4>
+                <p style="font-size: 0.92rem; color: var(--text-muted); line-height: 1.6;">
+                    Community health insights are severely constrained because health-related data is fragmented, manual, difficult to collect, and challenging to analyze in real time. Healthcare planning and resource allocation become unreliable when community-level epidemiology is unavailable or scattered across disparate, non-standardized sources.
+                </p>
+            </div>
+            <div>
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.35rem;">
+                    Project Objective:
+                </h4>
+                <p style="font-size: 0.92rem; color: var(--text-muted); line-height: 1.6;">
+                    Build a user-friendly, full-stack web application that empowers healthcare workers, public health officials, and community coordinators to collect, standardize, manage, analyze, visualize, and understand community health data to drive proactive healthcare planning.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Architecture & Workflow -->
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-sitemap"></i> System Architecture & Data Flow</h3>
+            <span class="badge badge-normal">Full-Stack Implementation</span>
+        </div>
+        <div class="card-body">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem;">
+                <!-- Layer 1 -->
+                <div style="background: #f8fafc; border: 1px solid var(--card-border); border-radius: var(--radius-md); padding: 1.25rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--primary); font-weight: 700; margin-bottom: 0.5rem;">
+                        <i class="fas fa-laptop-code" style="font-size: 1.2rem;"></i>
+                        <span>1. Frontend Presentation Layer</span>
+                    </div>
+                    <ul style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; padding-left: 1.25rem;">
+                        <li><strong>HTML5 & CSS3:</strong> Custom responsive design system with medical color themes and print stylesheets.</li>
+                        <li><strong>Vanilla JavaScript (ES6+):</strong> Real-time BMI calculation, dynamic multi-attribute filtering, debounce search.</li>
+                        <li><strong>Chart.js:</strong> Interactive canvas-rendered epidemiology graphs (Doughnut, Bar, Polar Area, Line).</li>
+                    </ul>
+                </div>
+
+                <!-- Layer 2 -->
+                <div style="background: #f8fafc; border: 1px solid var(--card-border); border-radius: var(--radius-md); padding: 1.25rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; color: #0284c7; font-weight: 700; margin-bottom: 0.5rem;">
+                        <i class="fas fa-server" style="font-size: 1.2rem;"></i>
+                        <span>2. Application Backend (Python Flask)</span>
+                    </div>
+                    <ul style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; padding-left: 1.25rem;">
+                        <li><strong>Flask 3.x Engine:</strong> Lightweight WSGI application handling routing, Jinja2 template rendering, and REST APIs.</li>
+                        <li><strong>Clinical Validation Engine:</strong> Server-side bounds checking for vitals, height, weight, and blood pressure.</li>
+                        <li><strong>Export Controller:</strong> Dynamic CSV and formatted JSON streaming generators.</li>
+                    </ul>
+                </div>
+
+                <!-- Layer 3 -->
+                <div style="background: #f8fafc; border: 1px solid var(--card-border); border-radius: var(--radius-md); padding: 1.25rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; color: #10b981; font-weight: 700; margin-bottom: 0.5rem;">
+                        <i class="fas fa-database" style="font-size: 1.2rem;"></i>
+                        <span>3. Persistence Layer (SQLite3)</span>
+                    </div>
+                    <ul style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; padding-left: 1.25rem;">
+                        <li><strong>SQLite Database:</strong> Embedded, zero-configuration relational database engine (<c>community_health.db</c>).</li>
+                        <li><strong>B-Tree Indexes:</strong> Fast lookup indexes on location, gender, diabetes, and risk score columns.</li>
+                        <li><strong>Seed Generator:</strong> Realistic, statistically correlated baseline data generation for instant evaluation.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Ethics & Privacy -->
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-user-shield"></i> Data Ethics, Anonymization & Privacy Compliance</h3>
+            <span class="badge badge-normal"><i class="fas fa-check"></i> Safe Synthetic Dataset</span>
+        </div>
+        <div class="card-body">
+            <p style="font-size: 0.92rem; color: var(--text-main); line-height: 1.6; margin-bottom: 1rem;">
+                In accordance with public health informatics ethics and regulations (including HIPAA Safe Harbor De-identification and GDPR principles):
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+                <div style="padding: 0.85rem 1rem; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: var(--radius-md);">
+                    <strong style="color: #065f46; font-size: 0.88rem; display: block; margin-bottom: 0.25rem;">
+                        <i class="fas fa-check-circle"></i> Zero Personally Identifiable Information (PII)
+                    </strong>
+                    <span style="font-size: 0.82rem; color: #047857;">
+                        No names, phone numbers, social IDs, street addresses, or dates of birth are collected or stored.
+                    </span>
+                </div>
+
+                <div style="padding: 0.85rem 1rem; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: var(--radius-md);">
+                    <strong style="color: #065f46; font-size: 0.88rem; display: block; margin-bottom: 0.25rem;">
+                        <i class="fas fa-check-circle"></i> Synthetic Sample Population
+                    </strong>
+                    <span style="font-size: 0.82rem; color: #047857;">
+                        All records are synthetically generated based on real-world epidemiology distributions for academic demonstration.
+                    </span>
+                </div>
+
+                <div style="padding: 0.85rem 1rem; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: var(--radius-md);">
+                    <strong style="color: #065f46; font-size: 0.88rem; display: block; margin-bottom: 0.25rem;">
+                        <i class="fas fa-check-circle"></i> Anonymized Sequential Identifiers
+                    </strong>
+                    <span style="font-size: 0.82rem; color: #047857;">
+                        Records are identified solely through sequential codes (e.g., CHD-1042) ensuring complete participant privacy.
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- College Viva & Review Presentation Guide -->
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-graduation-cap"></i> College Project Review / Viva Q&A Guide</h3>
+            <span class="badge badge-secondary">Presentation Helper</span>
+        </div>
+        <div class="card-body">
+            <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                <div style="border-bottom: 1px solid var(--card-border); padding-bottom: 1rem;">
+                    <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--primary);">
+                        Q1: Why did you choose Python Flask and SQLite for this project?
+                    </h4>
+                    <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.35rem; line-height: 1.5;">
+                        <strong>Answer:</strong> Flask is a microframework that provides high transparency, clean routing, and minimal overhead, making it ideal for academic demonstration. SQLite provides a self-contained, serverless zero-configuration relational database that requires no external database service setup while fully supporting standard SQL queries, indexes, and transactions.
+                    </p>
+                </div>
+
+                <div style="border-bottom: 1px solid var(--card-border); padding-bottom: 1rem;">
+                    <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--primary);">
+                        Q2: How are clinical indicators (BMI, BP category, Risk tier) determined?
+                    </h4>
+                    <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.35rem; line-height: 1.5;">
+                        <strong>Answer:</strong> They are classified using standard global medical guidelines: WHO classification for Body Mass Index (Underweight &lt;18.5, Normal 18.5-24.9, Overweight 25-29.9, Obese &ge;30), American Heart Association (AHA) guidelines for Blood Pressure (Normal, Elevated, Stage 1, Stage 2, Crisis), and ADA fasting criteria for blood glucose. The overall risk tier is calculated using a weighted comorbidity scoring matrix.
+                    </p>
+                </div>
+
+                <div style="border-bottom: 1px solid var(--card-border); padding-bottom: 1rem;">
+                    <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--primary);">
+                        Q3: How does this system solve the fragmentation problem stated in the objective?
+                    </h4>
+                    <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.35rem; line-height: 1.5;">
+                        <strong>Answer:</strong> It provides a centralized digital ingestion portal with immediate validation, automatic metric derivation, and real-time dashboard aggregation. Healthcare administrators can immediately view geographic disease burden, filter by age/gender, and export data or print executive assessment reports with a single click.
+                    </p>
+                </div>
+
+                <div>
+                    <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--primary);">
+                        Q4: What future enhancements could be added to this project?
+                    </h4>
+                    <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.35rem; line-height: 1.5;">
+                        <strong>Answer:</strong> Future extensions could include GIS interactive mapping (Leaflet.js) to display disease clusters geographically, machine learning models (e.g., Logistic Regression or Random Forests) to predict individual 5-year chronic disease risk, and multi-user role-based authentication (Field Surveyor, Clinician, Health Director).
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics{% endblock %}
+{% block breadcrumb %}Public Health Analytics{% endblock %}
+
+{% block content %}
+<div class="page-title-bar">
+    <div class="page-title-box">
+        <h1>Epidemiological Insights & Analytics</h1>
+        <p>Advanced statistical correlations, lifestyle impact analysis, and community vulnerability evaluations.</p>
+    </div>
+    <div class="page-title-actions">
+        <select id="analytics-location-filter" class="form-select" style="min-width: 220px;">
+            <option value="">All Community Locations</option>
+            {% for loc in locations %}
+                <option value="{{ loc }}">{{ loc }}</option>
+            {% endfor %}
+        </select>
+        <a href="{{ url_for('reports_view') }}" class="btn btn-primary">
+            <i class="fas fa-file-invoice"></i> View Assessment Report
+        </a>
+    </div>
+</div>
+
+<!-- Analytical Highlights / Key Epidemiological Insights -->
+<div class="kpi-grid">
+    <div class="kpi-card kpi-primary">
+        <div class="kpi-info">
+            <span class="kpi-label">Mean Systolic BP</span>
+            <span class="kpi-value">{{ summary.avg_systolic }} <small style="font-size:0.9rem;">mmHg</small></span>
+            <span class="kpi-subtext">
+                <span class="badge {{ 'badge-elevated' if summary.avg_systolic >= 120 else 'badge-normal' }}">
+                    {{ 'Pre-Hypertension Range' if summary.avg_systolic >= 120 else 'Normal Range' }}
+                </span>
+            </span>
+        </div>
+        <div class="kpi-icon-box">
+            <i class="fas fa-stethoscope"></i>
+        </div>
+    </div>
+
+    <div class="kpi-card kpi-warning">
+        <div class="kpi-info">
+            <span class="kpi-label">Mean Fasting Glucose</span>
+            <span class="kpi-value">{{ summary.avg_glucose }} <small style="font-size:0.9rem;">mg/dL</small></span>
+            <span class="kpi-subtext">
+                <span class="badge {{ 'badge-warning' if summary.avg_glucose >= 100 else 'badge-normal' }}">
+                    {{ 'Impaired Fasting Baseline' if summary.avg_glucose >= 100 else 'Euglycemic' }}
+                </span>
+            </span>
+        </div>
+        <div class="kpi-icon-box">
+            <i class="fas fa-cubes-stacked"></i>
+        </div>
+    </div>
+
+    <div class="kpi-card kpi-danger">
+        <div class="kpi-info">
+            <span class="kpi-label">High Risk Tier Population</span>
+            <span class="kpi-value">{{ summary.high_risk_cases }}</span>
+            <span class="kpi-subtext">
+                <span class="badge badge-danger">{{ summary.high_risk_rate }}% High Vulnerability</span>
+            </span>
+        </div>
+        <div class="kpi-icon-box">
+            <i class="fas fa-triangle-exclamation"></i>
+        </div>
+    </div>
+
+    <div class="kpi-card kpi-info">
+        <div class="kpi-info">
+            <span class="kpi-label">Primary Care Access Rate</span>
+            <span class="kpi-value">{{ summary.healthcare_access_pct }}%</span>
+            <span class="kpi-subtext">
+                <span class="badge badge-info">Community Clinic Reach</span>
+            </span>
+        </div>
+        <div class="kpi-icon-box">
+            <i class="fas fa-hospital"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Correlation & Cross-Tabulation Charts -->
+<div class="charts-grid">
+    <!-- Chart 1: Physical Activity vs Chronic Conditions -->
+    <div class="card chart-card">
+        <div class="card-header">
+            <h3><i class="fas fa-person-running"></i> Physical Activity vs Chronic Burden</h3>
+            <span class="badge badge-secondary">Behavioral Impact</span>
+        </div>
+        <div class="card-body">
+            <canvas id="chart-activity-impact"></canvas>
+        </div>
+    </div>
+
+    <!-- Chart 2: Age Cohort vs Population Distribution -->
+    <div class="card chart-card">
+        <div class="card-header">
+            <h3><i class="fas fa-chart-area"></i> Age Cohort Risk Curve</h3>
+            <span class="badge badge-secondary">Epidemiological Profile</span>
+        </div>
+        <div class="card-body">
+            <canvas id="chart-age-risk"></canvas>
+        </div>
+    </div>
+
+    <!-- Chart 3: BMI vs Diabetes Risk Proportion -->
+    <div class="card chart-card">
+        <div class="card-header">
+            <h3><i class="fas fa-weight-scale"></i> Weight Status Spectrum</h3>
+            <span class="badge badge-secondary">Adiposity Risk</span>
+        </div>
+        <div class="card-body">
+            <canvas id="chart-bmi-diabetes"></canvas>
+        </div>
+    </div>
+
+    <!-- Chart 4: Risk Score Tier Polar Area -->
+    <div class="card chart-card">
+        <div class="card-header">
+            <h3><i class="fas fa-shield-halved"></i> Tri-Tier Risk Stratification</h3>
+            <span class="badge badge-secondary">Clinical Vulnerability</span>
+        </div>
+        <div class="card-body">
+            <canvas id="chart-risk-polar"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Public Health Planning Insights Matrix -->
+<div class="card" style="margin-top: 1.5rem;">
+    <div class="card-header">
+        <h3><i class="fas fa-lightbulb"></i> Evidence-Based Public Health Planning Insights</h3>
+        <span class="badge badge-secondary">Intervention Guidelines</span>
+    </div>
+    <div class="card-body">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
+            <div style="padding: 1rem; background-color: #f8fafc; border-radius: var(--radius-md); border-left: 4px solid var(--primary);">
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--primary); margin-bottom: 0.35rem;">
+                    <i class="fas fa-heart-circle-check"></i> Cardiovascular Risk Mitigation
+                </h4>
+                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
+                    Data highlights a significant cluster of stage 1 and stage 2 hypertension. Establishing bi-weekly community BP monitoring booths and low-sodium nutrition drives in the most affected wards can cut emergency events by up to 28%.
+                </p>
+            </div>
+
+            <div style="padding: 1rem; background-color: #f8fafc; border-radius: var(--radius-md); border-left: 4px solid var(--status-elevated);">
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: #d97706; margin-bottom: 0.35rem;">
+                    <i class="fas fa-utensils"></i> Prediabetes Interception Window
+                </h4>
+                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
+                    Over <strong>{{ summary.prediabetes_cases }} screened individuals</strong> fall into the prediabetic range (100–125 mg/dL). Lifestyle coaching and glycemic control programs can prevent progression to type-2 diabetes in 60% of prediabetic individuals.
+                </p>
+            </div>
+
+            <div style="padding: 1rem; background-color: #f8fafc; border-radius: var(--radius-md); border-left: 4px solid var(--status-danger);">
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--status-danger); margin-bottom: 0.35rem;">
+                    <i class="fas fa-house-medical-circle-exclamation"></i> Healthcare Access Disparity
+                </h4>
+                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
+                    Roughly <strong>{{ 100 - summary.healthcare_access_pct }}%</strong> of screened individuals report lack of regular primary healthcare access. Areas with lower clinic coverage exhibit disproportionately higher rates of undiagnosed stage 2 hypertension.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+{% endblock %}

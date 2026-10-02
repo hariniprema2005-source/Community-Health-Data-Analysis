@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}Public Health Reports{% endblock %}
+{% block breadcrumb %}Assessment Reports{% endblock %}
+
+{% block content %}
+<div class="page-title-bar no-print">
+    <div class="page-title-box">
+        <h1>Community Health Assessment Report</h1>
+        <p>Official public health diagnostic report synthesized from all active screened community records.</p>
+    </div>
+    <div class="page-title-actions">
+        <button onclick="window.print()" class="btn btn-primary">
+            <i class="fas fa-print"></i> Print / Save PDF
+        </button>
+        <a href="{{ url_for('export_csv') }}" class="btn btn-secondary">
+            <i class="fas fa-file-csv" style="color: #0f766e;"></i> Download CSV
+        </a>
+        <a href="{{ url_for('export_json') }}" class="btn btn-secondary">
+            <i class="fas fa-file-code" style="color: #0284c7;"></i> Download JSON
+        </a>
+    </div>
+</div>
+
+<!-- Formal Printable Report Paper Container -->
+<div class="report-paper">
+    <!-- Header Band -->
+    <div class="report-header-band">
+        <div class="report-title-area">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <div class="brand-icon" style="width: 36px; height: 36px; font-size: 1.1rem;">
+                    <i class="fas fa-heart-pulse"></i>
+                </div>
+                <span style="font-weight: 700; color: #0f766e; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em;">
+                    Public Health Division • Community Health Surveillance
+                </span>
+            </div>
+            <h1>Community Health Status Report</h1>
+            <p>Epidemiological Assessment & Chronic Disease Burden Analysis</p>
+        </div>
+        <div class="report-meta-box">
+            <div><strong>Report Ref:</strong> CHDA-{{ generated_date[:10].replace('-', '').replace(' ', '') }}</div>
+            <div><strong>Generated:</strong> {{ generated_date }}</div>
+            <div><strong>Status:</strong> Validated Dataset</div>
+            <div><strong>Confidentiality:</strong> De-Identified Public Data</div>
+        </div>
+    </div>
+
+    <!-- Section 1: Executive Summary -->
+    <div class="report-section">
+        <h2 class="report-section-heading">
+            <i class="fas fa-file-lines"></i> 1. Executive Summary
+        </h2>
+        <p style="font-size: 0.92rem; color: var(--text-main); line-height: 1.6; margin-bottom: 1rem;">
+            This report evaluates aggregate health indicator data collected across <strong>{{ summary.total_records }} individuals</strong> 
+            screened in local community clinics, mobile screening camps, and baseline neighborhood surveys. 
+            The sample reflects an average adult participant age of <strong>{{ summary.avg_age }} years</strong> with a mean Body Mass Index (BMI) 
+            of <strong>{{ summary.avg_bmi }}</strong>.
+        </p>
+        <p style="font-size: 0.92rem; color: var(--text-main); line-height: 1.6;">
+            Key findings identify a <strong>{{ summary.hypertension_rate }}%</strong> prevalence of hypertension ({{ summary.hypertension_cases }} cases) 
+            and a <strong>{{ summary.diabetes_rate }}%</strong> prevalence of diagnosed type-2 diabetes ({{ summary.diabetes_cases }} cases), 
+            with an additional <strong>{{ summary.prediabetes_cases }} individuals</strong> exhibiting prediabetic fasting blood glucose levels.
+        </p>
+    </div>
+
+    <!-- Section 2: Key Clinical Indicators Matrix -->
+    <div class="report-section">
+        <h2 class="report-section-heading">
+            <i class="fas fa-table-list"></i> 2. Primary Epidemiological Indicators
+        </h2>
+        <div class="table-responsive">
+            <table class="data-table" style="border: 1px solid var(--card-border);">
+                <thead>
+                    <tr>
+                        <th>Public Health Indicator</th>
+                        <th>Observed Metric</th>
+                        <th>Reference Threshold</th>
+                        <th>Epidemiological Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Total Cohort Screened</strong></td>
+                        <td>{{ summary.total_records }} Individuals</td>
+                        <td>Representative Sample</td>
+                        <td><span class="badge badge-normal">Active Cohort</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mean Age</strong></td>
+                        <td>{{ summary.avg_age }} Years</td>
+                        <td>General Adult Population</td>
+                        <td><span class="badge badge-secondary">Adult</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mean BMI</strong></td>
+                        <td>{{ summary.avg_bmi }} kg/m&sup2;</td>
+                        <td>18.5 – 24.9 (WHO Normal)</td>
+                        <td>
+                            <span class="badge {{ 'badge-overweight' if summary.avg_bmi >= 25 else 'badge-normal' }}">
+                                {{ 'Overweight Average' if summary.avg_bmi >= 25 else 'Optimal Range' }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Hypertension Prevalence</strong></td>
+                        <td>{{ summary.hypertension_cases }} Cases ({{ summary.hypertension_rate }}%)</td>
+                        <td>&lt; 30% Public Benchmark</td>
+                        <td>
+                            <span class="badge {{ 'badge-danger' if summary.hypertension_rate > 40 else 'badge-warning' }}">
+                                High Burden
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Type-2 Diabetes Prevalence</strong></td>
+                        <td>{{ summary.diabetes_cases }} Cases ({{ summary.diabetes_rate }}%)</td>
+                        <td>&lt; 10% Public Benchmark</td>
+                        <td>
+                            <span class="badge {{ 'badge-danger' if summary.diabetes_rate > 10 else 'badge-warning' }}">
+                                Elevated Burden
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mean Systolic / Diastolic BP</strong></td>
+                        <td>{{ summary.avg_systolic }} / {{ summary.avg_diastolic }} mmHg</td>
+                        <td>&lt; 120 / 80 mmHg (AHA)</td>
+                        <td><span class="badge badge-warning">Elevated Baseline</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mean Fasting Blood Glucose</strong></td>
+                        <td>{{ summary.avg_glucose }} mg/dL</td>
+                        <td>70 – 99 mg/dL (Normal)</td>
+                        <td><span class="badge badge-warning">Impaired Fasting Baseline</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Primary Healthcare Access Rate</strong></td>
+                        <td>{{ summary.healthcare_access_pct }}%</td>
+                        <td>&gt; 90% Universal Target</td>
+                        <td>
+                            <span class="badge {{ 'badge-normal' if summary.healthcare_access_pct >= 85 else 'badge-warning' }}">
+                                Service Gap Exists
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section 3: Geographic Distribution & Disparities -->
+    <div class="report-section">
+        <h2 class="report-section-heading">
+            <i class="fas fa-map-location-dot"></i> 3. Geographic Distribution & Community Disparities
+        </h2>
+        <div class="table-responsive">
+            <table class="data-table" style="border: 1px solid var(--card-border);">
+                <thead>
+                    <tr>
+                        <th>Community / Ward</th>
+                        <th>Sample Size</th>
+                        <th>Diabetes Cases</th>
+                        <th>Hypertension Cases</th>
+                        <th>Obesity Count</th>
+                        <th>Mean BMI</th>
+                        <th>Mean Age</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for loc in charts_data.location_stats %}
+                    <tr>
+                        <td><strong><i class="fas fa-location-dot" style="color:var(--primary); margin-right:5px;"></i>{{ loc.location }}</strong></td>
+                        <td>{{ loc.total }}</td>
+                        <td>{{ loc.diabetes_count }} ({{ ((loc.diabetes_count / loc.total) * 100)|round(1) }}%)</td>
+                        <td>{{ loc.hypertension_count }} ({{ ((loc.hypertension_count / loc.total) * 100)|round(1) }}%)</td>
+                        <td>{{ loc.obese_count }}</td>
+                        <td>{{ loc.avg_bmi }}</td>
+                        <td>{{ loc.avg_age }} yrs</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section 4: Public Health Policy Recommendations -->
+    <div class="report-section">
+        <h2 class="report-section-heading">
+            <i class="fas fa-shield-virus"></i> 4. Priority Public Health Interventions
+        </h2>
+        <ul class="recommendations-list">
+            <li>
+                <strong>1. Targeted Hypertension Screening & Blood Pressure Clinics</strong>
+                Launch bi-weekly mobile blood pressure screening posts in high-burden wards. Provide free digital BP cuff training and sodium reduction nutritional education.
+            </li>
+            <li>
+                <strong>2. Community Diabetes Prevention Program (DPP)</strong>
+                Deploy specialized lifestyle intervention coaches to assist the {{ summary.prediabetes_cases }} individuals identified in the prediabetic range, focusing on structured physical activity and dietary glycemic moderation.
+            </li>
+            <li>
+                <strong>3. Nutrition & Physical Activity Community Infrastructure</strong>
+                Partner with local municipal bodies to establish accessible walking circuits, park fitness stations, and subsidize fresh produce markets in areas showing higher obesity rates.
+            </li>
+            <li>
+                <strong>4. Expansion of Primary Healthcare Sub-Centers</strong>
+                Direct healthcare resources toward communities with the lowest healthcare access percentages (currently at {{ 100 - summary.healthcare_access_pct }}% unserved) to mitigate delayed diagnosis of chronic cardiovascular conditions.
+            </li>
+        </ul>
+    </div>
+
+    <!-- Sign-off Footer -->
+    <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: flex-end; font-size: 0.84rem; color: #64748b;">
+        <div>
+            <div><strong>Prepared by:</strong> Community Health Informatics Research Unit</div>
+            <div><strong>Platform:</strong> Community Health Data Collection & Analysis System</div>
+        </div>
+        <div style="text-align: right;">
+            <div style="border-bottom: 1px solid #cbd5e1; width: 180px; margin-bottom: 4px;"></div>
+            <div>Public Health Officer / Reviewer</div>
+        </div>
+    </div>
+</div>
+{% endblock %}

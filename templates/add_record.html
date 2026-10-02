@@ -1,0 +1,329 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit Record' if is_edit else 'Add Health Record' }}{% endblock %}
+{% block breadcrumb %}{{ 'Edit Record' if is_edit else 'Add Record' }}{% endblock %}
+
+{% block content %}
+<div class="page-title-bar">
+    <div class="page-title-box">
+        <h1>{{ 'Edit Community Health Record' if is_edit else 'Collect Community Health Record' }}</h1>
+        <p>{{ 'Update epidemiological indicators and health observations.' if is_edit else 'Register a new screened community participant with real-time biometric and risk assessment.' }}</p>
+    </div>
+    <div class="page-title-actions">
+        <a href="{{ url_for('records_view') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Records
+        </a>
+    </div>
+</div>
+
+<div class="form-layout-grid">
+    <!-- Main Data Entry Form Container -->
+    <div class="card">
+        <div class="card-header">
+            <h3>
+                <i class="fas {{ 'fa-pen-to-square' if is_edit else 'fa-clipboard-user' }}"></i>
+                {{ 'Modify Health Data' if is_edit else 'Participant Health Screening Form' }}
+            </h3>
+            <span class="badge badge-secondary">All measurements de-identified</span>
+        </div>
+
+        <div class="card-body">
+            <form id="health-record-form" method="POST" action="{{ url_for('edit_record_view', record_id=record_id) if is_edit else url_for('add_record_view') }}">
+                
+                <!-- Section 1: Demographics -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fas fa-address-card"></i> Demographic Profile
+                    </div>
+                    <div class="form-section-desc">Basic non-personally identifiable community demographics.</div>
+
+                    <div class="form-row">
+                        <!-- Record Code -->
+                        <div>
+                            <label class="form-label" for="input-code">Record Identifier</label>
+                            <input type="text" id="input-code" name="record_code" class="form-control" 
+                                   value="{{ form_data.get('record_code', '') }}" 
+                                   placeholder="Auto-generated (e.g. CHD-1086)" {{ 'readonly' if is_edit else '' }}>
+                            <div class="form-hint">Leave blank to auto-generate next code.</div>
+                        </div>
+
+                        <!-- Age -->
+                        <div>
+                            <label class="form-label" for="input-age">Age (Years) <span class="required">*</span></label>
+                            <input type="number" id="input-age" name="age" class="form-control" min="1" max="120" 
+                                   value="{{ form_data.get('age', '') }}" required placeholder="e.g. 42">
+                            {% if errors.get('age') %}
+                                <div class="form-error"><i class="fas fa-circle-exclamation"></i> {{ errors.age }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Gender -->
+                        <div>
+                            <label class="form-label" for="select-gender">Gender <span class="required">*</span></label>
+                            <select id="select-gender" name="gender" class="form-select" required>
+                                <option value="" disabled {{ 'selected' if not form_data.get('gender') else '' }}>Select Gender</option>
+                                <option value="Male" {{ 'selected' if form_data.get('gender') == 'Male' else '' }}>Male</option>
+                                <option value="Female" {{ 'selected' if form_data.get('gender') == 'Female' else '' }}>Female</option>
+                                <option value="Other" {{ 'selected' if form_data.get('gender') == 'Other' else '' }}>Other</option>
+                            </select>
+                            {% if errors.get('gender') %}
+                                <div class="form-error"><i class="fas fa-circle-exclamation"></i> {{ errors.gender }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Location / Area -->
+                        <div>
+                            <label class="form-label" for="input-location">Community Area / Ward <span class="required">*</span></label>
+                            <input type="text" id="input-location" name="location" list="location-options" class="form-control" 
+                                   value="{{ form_data.get('location', '') }}" required placeholder="e.g. North District">
+                            <datalist id="location-options">
+                                {% for loc in locations %}
+                                    <option value="{{ loc }}">
+                                {% endfor %}
+                            </datalist>
+                            {% if errors.get('location') %}
+                                <div class="form-error"><i class="fas fa-circle-exclamation"></i> {{ errors.location }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Anthropometric Measurements -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fas fa-weight-scale"></i> Anthropometric Measurements
+                    </div>
+                    <div class="form-section-desc">Height and weight inputs calculate Body Mass Index (BMI) dynamically.</div>
+
+                    <div class="form-row">
+                        <div>
+                            <label class="form-label" for="input-height">Height (cm) <span class="required">*</span></label>
+                            <input type="number" step="0.1" id="input-height" name="height_cm" class="form-control" 
+                                   min="40" max="250" value="{{ form_data.get('height_cm', '') }}" required placeholder="e.g. 172.5">
+                            {% if errors.get('height_cm') %}
+                                <div class="form-error"><i class="fas fa-circle-exclamation"></i> {{ errors.height_cm }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label class="form-label" for="input-weight">Weight (kg) <span class="required">*</span></label>
+                            <input type="number" step="0.1" id="input-weight" name="weight_kg" class="form-control" 
+                                   min="2" max="350" value="{{ form_data.get('weight_kg', '') }}" required placeholder="e.g. 74.0">
+                            {% if errors.get('weight_kg') %}
+                                <div class="form-error"><i class="fas fa-circle-exclamation"></i> {{ errors.weight_kg }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Cardiovascular & Metabolic Biomarkers -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fas fa-heart-pulse"></i> Vital Signs & Biomarkers
+                    </div>
+                    <div class="form-section-desc">Standard physiological indicators measured at community clinic or screening camp.</div>
+
+                    <div class="form-row">
+                        <div>
+                            <label class="form-label" for="input-systolic">Systolic BP (mmHg) <span class="required">*</span></label>
+                            <input type="number" id="input-systolic" name="systolic_bp" class="form-control" 
+                                   min="60" max="260" value="{{ form_data.get('systolic_bp', '') }}" required placeholder="e.g. 128">
+                            <div class="form-hint">Upper number (Systolic)</div>
+                            {% if errors.get('systolic_bp') %}
+                                <div class="form-error"><i class="fas fa-circle-exclamation"></i> {{ errors.systolic_bp }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label class="form-label" for="input-diastolic">Diastolic BP (mmHg) <span class="required">*</span></label>
+                            <input type="number" id="input-diastolic" name="diastolic_bp" class="form-control" 
+                                   min="40" max="160" value="{{ form_data.get('diastolic_bp', '') }}" required placeholder="e.g. 84">
+                            <div class="form-hint">Lower number (Diastolic)</div>
+                            <div id="bp-cross-error" class="form-error" style="display: none;">
+                                <i class="fas fa-circle-exclamation"></i> Diastolic BP must be lower than Systolic BP.
+                            </div>
+                            {% if errors.get('diastolic_bp') %}
+                                <div class="form-error"><i class="fas fa-circle-exclamation"></i> {{ errors.diastolic_bp }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label class="form-label" for="input-glucose">Fasting Blood Glucose (mg/dL) <span class="required">*</span></label>
+                            <input type="number" step="0.1" id="input-glucose" name="blood_glucose" class="form-control" 
+                                   min="30" max="600" value="{{ form_data.get('blood_glucose', '') }}" required placeholder="e.g. 104.5">
+                            <div id="diabetes-clinical-hint" class="form-hint" style="color: var(--status-elevated); display:none;"></div>
+                            {% if errors.get('blood_glucose') %}
+                                <div class="form-error"><i class="fas fa-circle-exclamation"></i> {{ errors.blood_glucose }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: Diagnosed Chronic Conditions -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fas fa-stethoscope"></i> Clinical Diagnosis History
+                    </div>
+                    <div class="form-section-desc">Formal diagnoses reported or validated in the participant's record.</div>
+
+                    <div class="form-row">
+                        <div>
+                            <label class="form-label" for="select-diabetes">Diabetes Status <span class="required">*</span></label>
+                            <select id="select-diabetes" name="diabetes" class="form-select" required>
+                                <option value="No" {{ 'selected' if form_data.get('diabetes') == 'No' else '' }}>No</option>
+                                <option value="Yes" {{ 'selected' if form_data.get('diabetes') == 'Yes' else '' }}>Yes (Diagnosed)</option>
+                                <option value="Pre-diabetic" {{ 'selected' if form_data.get('diabetes') == 'Pre-diabetic' else '' }}>Pre-diabetic</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="form-label" for="select-hypertension">Hypertension Status <span class="required">*</span></label>
+                            <select id="select-hypertension" name="hypertension" class="form-select" required>
+                                <option value="No" {{ 'selected' if form_data.get('hypertension') == 'No' else '' }}>No</option>
+                                <option value="Yes" {{ 'selected' if form_data.get('hypertension') == 'Yes' else '' }}>Yes (Diagnosed)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 5: Behavioral & Healthcare Determinants -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fas fa-person-walking"></i> Behavioral & Social Determinants
+                    </div>
+                    <div class="form-section-desc">Lifestyle habits and institutional access influencing community health outcomes.</div>
+
+                    <div class="form-row">
+                        <div>
+                            <label class="form-label" for="select-smoking">Tobacco Smoking</label>
+                            <select id="select-smoking" name="smoking_status" class="form-select">
+                                <option value="Never" {{ 'selected' if form_data.get('smoking_status') == 'Never' else '' }}>Never Smoked</option>
+                                <option value="Former" {{ 'selected' if form_data.get('smoking_status') == 'Former' else '' }}>Former Smoker</option>
+                                <option value="Current" {{ 'selected' if form_data.get('smoking_status') == 'Current' else '' }}>Current Smoker</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="form-label" for="select-activity">Physical Activity Level</label>
+                            <select id="select-activity" name="physical_activity" class="form-select">
+                                <option value="Sedentary" {{ 'selected' if form_data.get('physical_activity') == 'Sedentary' else '' }}>Sedentary (&lt; 30 min/week)</option>
+                                <option value="Moderate" {{ 'selected' if form_data.get('physical_activity', 'Moderate') == 'Moderate' else '' }}>Moderate (150 min/week)</option>
+                                <option value="Active" {{ 'selected' if form_data.get('physical_activity') == 'Active' else '' }}>Active (&gt; 300 min/week)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="form-label" for="select-alcohol">Alcohol Consumption</label>
+                            <select id="select-alcohol" name="alcohol_intake" class="form-select">
+                                <option value="None" {{ 'selected' if form_data.get('alcohol_intake', 'None') == 'None' else '' }}>None</option>
+                                <option value="Occasional" {{ 'selected' if form_data.get('alcohol_intake') == 'Occasional' else '' }}>Occasional</option>
+                                <option value="Regular" {{ 'selected' if form_data.get('alcohol_intake') == 'Regular' else '' }}>Regular</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="form-label" for="select-general-health">Self-Rated Health</label>
+                            <select id="select-general-health" name="general_health" class="form-select">
+                                <option value="Excellent" {{ 'selected' if form_data.get('general_health') == 'Excellent' else '' }}>Excellent</option>
+                                <option value="Good" {{ 'selected' if form_data.get('general_health', 'Good') == 'Good' else '' }}>Good</option>
+                                <option value="Fair" {{ 'selected' if form_data.get('general_health') == 'Fair' else '' }}>Fair</option>
+                                <option value="Poor" {{ 'selected' if form_data.get('general_health') == 'Poor' else '' }}>Poor</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="form-label" for="select-access">Access to Primary Healthcare</label>
+                            <select id="select-access" name="healthcare_access" class="form-select">
+                                <option value="Yes" {{ 'selected' if form_data.get('healthcare_access', 'Yes') == 'Yes' else '' }}>Yes (Regular Access)</option>
+                                <option value="No" {{ 'selected' if form_data.get('healthcare_access') == 'No' else '' }}>No (Limited/No Clinic)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 6: Notes -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fas fa-file-lines"></i> Field Notes & Clinical Observations
+                    </div>
+                    <div>
+                        <textarea name="notes" id="input-notes" class="form-control" rows="3" 
+                                  placeholder="Observational notes from healthcare worker, referral suggestions, or screening camp remarks...">{{ form_data.get('notes', '') }}</textarea>
+                    </div>
+                </div>
+
+                <!-- Form Action Buttons -->
+                <div style="display: flex; align-items: center; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+                    <a href="{{ url_for('records_view') }}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas {{ 'fa-check' if is_edit else 'fa-save' }}"></i>
+                        {{ 'Update Health Record' if is_edit else 'Save Record to Database' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Live Health Calculator & Risk Meter Preview Widget -->
+    <div class="calculator-card">
+        <div class="calc-header">
+            <i class="fas fa-heart-pulse" style="font-size: 1.3rem;"></i>
+            <div>
+                <h3>Live Health Classifier</h3>
+                <div style="font-size: 0.75rem; opacity: 0.9;">Real-time epidemiological metrics</div>
+            </div>
+        </div>
+
+        <div class="calc-body">
+            <!-- BMI Preview -->
+            <div class="calc-metric-box">
+                <div>
+                    <div class="calc-metric-title">Body Mass Index (BMI)</div>
+                    <div class="calc-metric-value" id="preview-bmi-value">—</div>
+                </div>
+                <div>
+                    <span id="preview-bmi-category" class="badge badge-secondary">—</span>
+                </div>
+            </div>
+
+            <!-- Blood Pressure Category Preview -->
+            <div class="calc-metric-box">
+                <div>
+                    <div class="calc-metric-title">Blood Pressure Status</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">AHA/ACC Standard</div>
+                </div>
+                <div>
+                    <span id="preview-bp-category" class="badge badge-secondary">—</span>
+                </div>
+            </div>
+
+            <!-- Fasting Glucose Status Preview -->
+            <div class="calc-metric-box">
+                <div>
+                    <div class="calc-metric-title">Glucose Classification</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">ADA Fasting Criteria</div>
+                </div>
+                <div>
+                    <span id="preview-glucose-status" class="badge badge-secondary">—</span>
+                </div>
+            </div>
+
+            <!-- Overall Health Risk Assessment Meter -->
+            <div id="preview-risk-meter" class="risk-meter risk-low">
+                <div class="risk-meter-title">Calculated Health Risk Tier</div>
+                <div id="preview-risk-value" class="risk-meter-score">Low Risk</div>
+                <div style="font-size: 0.75rem; opacity: 0.85;">Based on age, BMI, vitals & chronic indicators</div>
+            </div>
+
+            <div style="font-size: 0.76rem; color: var(--text-muted); line-height: 1.4; padding: 0.25rem;">
+                <i class="fas fa-shield-halved" style="color: var(--primary);"></i>
+                Metrics are automatically stored and linked to aggregate epidemiological public health dashboards.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/add_record.js') }}"></script>
+{% endblock %}

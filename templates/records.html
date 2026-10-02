@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Health Records{% endblock %}
+{% block breadcrumb %}Health Data Records{% endblock %}
+
+{% block content %}
+<div class="page-title-bar">
+    <div class="page-title-box">
+        <h1>Community Health Records</h1>
+        <p>Explore, search, filter, and manage individual anonymized community health assessments.</p>
+    </div>
+    <div class="page-title-actions">
+        <button id="btn-export-filtered-csv" class="btn btn-secondary">
+            <i class="fas fa-file-csv" style="color: #0f766e;"></i> Export Filtered CSV
+        </button>
+        <a href="{{ url_for('export_json') }}" class="btn btn-secondary">
+            <i class="fas fa-file-code" style="color: #0284c7;"></i> Export JSON
+        </a>
+        <a href="{{ url_for('add_record_view') }}" class="btn btn-primary">
+            <i class="fas fa-user-plus"></i> Add New Record
+        </a>
+    </div>
+</div>
+
+<!-- Dynamic Search & Multi-Filter Toolbar -->
+<div class="filter-toolbar">
+    <div class="filter-grid">
+        <!-- Search -->
+        <div class="search-input-wrapper">
+            <label class="form-label" for="record-search">Search Records</label>
+            <div style="position: relative;">
+                <i class="fas fa-search"></i>
+                <input type="text" id="record-search" class="form-control" placeholder="Search by Record ID (e.g. CHD-1025), location, or notes...">
+            </div>
+        </div>
+
+        <!-- Filter: Location -->
+        <div>
+            <label class="form-label" for="filter-location">Location / Area</label>
+            <select id="filter-location" class="form-select">
+                <option value="">All Locations</option>
+                {% for loc in locations %}
+                    <option value="{{ loc }}">{{ loc }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Filter: Gender -->
+        <div>
+            <label class="form-label" for="filter-gender">Gender</label>
+            <select id="filter-gender" class="form-select">
+                <option value="">All Genders</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+
+        <!-- Filter: Diabetes -->
+        <div>
+            <label class="form-label" for="filter-diabetes">Diabetes Status</label>
+            <select id="filter-diabetes" class="form-select">
+                <option value="">All Statuses</option>
+                <option value="Yes">Yes (Diabetic)</option>
+                <option value="No">No</option>
+                <option value="Pre-diabetic">Pre-diabetic</option>
+            </select>
+        </div>
+
+        <!-- Filter: Hypertension -->
+        <div>
+            <label class="form-label" for="filter-hypertension">Hypertension</label>
+            <select id="filter-hypertension" class="form-select">
+                <option value="">All Statuses</option>
+                <option value="Yes">Yes (Hypertensive)</option>
+                <option value="No">No (Normal BP)</option>
+            </select>
+        </div>
+
+        <!-- Filter: BMI Category -->
+        <div>
+            <label class="form-label" for="filter-bmi">BMI Category</label>
+            <select id="filter-bmi" class="form-select">
+                <option value="">All BMI Categories</option>
+                <option value="Underweight">Underweight (&lt; 18.5)</option>
+                <option value="Normal">Normal Weight (18.5 - 24.9)</option>
+                <option value="Overweight">Overweight (25 - 29.9)</option>
+                <option value="Obese">Obese (&ge; 30)</option>
+            </select>
+        </div>
+
+        <!-- Filter: Risk Tier -->
+        <div>
+            <label class="form-label" for="filter-risk">Risk Score Tier</label>
+            <select id="filter-risk" class="form-select">
+                <option value="">All Risk Tiers</option>
+                <option value="Low">Low Risk</option>
+                <option value="Moderate">Moderate Risk</option>
+                <option value="High">High Risk</option>
+            </select>
+        </div>
+
+        <!-- Reset Button -->
+        <div class="filter-actions">
+            <button id="btn-reset-filters" class="btn btn-secondary" style="width: 100%;">
+                <i class="fas fa-undo"></i> Reset Filters
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Records Data Table Card -->
+<div class="card">
+    <div class="card-header">
+        <h3><i class="fas fa-hospital-user"></i> Registered Community Health Records</h3>
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <label for="per-page-select" style="font-size: 0.82rem; color: var(--text-muted); margin: 0;">Show:</label>
+            <select id="per-page-select" class="form-select" style="width: 80px; padding: 0.35rem 0.65rem; font-size: 0.82rem;">
+                <option value="15" selected>15</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="card-body" style="padding: 0;">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th class="sortable" data-sort="id">Record ID <i class="fas fa-sort"></i></th>
+                        <th class="sortable" data-sort="age">Age <i class="fas fa-sort"></i></th>
+                        <th class="sortable" data-sort="gender">Gender <i class="fas fa-sort"></i></th>
+                        <th class="sortable" data-sort="location">Location <i class="fas fa-sort"></i></th>
+                        <th class="sortable" data-sort="bmi">BMI & Category <i class="fas fa-sort"></i></th>
+                        <th class="sortable" data-sort="systolic_bp">Blood Pressure <i class="fas fa-sort"></i></th>
+                        <th class="sortable" data-sort="blood_glucose">Glucose <i class="fas fa-sort"></i></th>
+                        <th>Diabetes</th>
+                        <th>Hypertension</th>
+                        <th class="sortable" data-sort="risk_score">Risk Tier <i class="fas fa-sort"></i></th>
+                        <th style="text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="records-table-body">
+                    <!-- Populated dynamically via records.js -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Footer -->
+        <div class="pagination-container" style="padding: 1rem 1.5rem;">
+            <div id="records-table-info" class="pagination-info">Showing records...</div>
+            <div id="pagination-nav" class="pagination-nav"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: View Record Details -->
+<div id="view-record-modal" class="modal-overlay">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3><i class="fas fa-id-card-clip"></i> Patient Health Record Profile</h3>
+            <button class="modal-close-btn" onclick="closeModal('view-record-modal')">&times;</button>
+        </div>
+        <div class="modal-body" id="view-modal-content">
+            <!-- Dynamic Content -->
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('view-record-modal')">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Delete Confirmation -->
+<div id="delete-confirm-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width: 460px;">
+        <div class="modal-header">
+            <h3 style="color: var(--status-danger);"><i class="fas fa-triangle-exclamation"></i> Confirm Record Deletion</h3>
+            <button class="modal-close-btn" onclick="closeModal('delete-confirm-modal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p id="delete-modal-msg" style="color: var(--text-main); font-size: 0.95rem; line-height: 1.5;">
+                Are you sure you want to permanently delete this health record?
+            </p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('delete-confirm-modal')">Cancel</button>
+            <button id="btn-confirm-delete" class="btn btn-danger">
+                <i class="fas fa-trash-alt"></i> Delete Record
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/records.js') }}"></script>
+{% endblock %}

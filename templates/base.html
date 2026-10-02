@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dashboard{% endblock %} | Community Health Data Collection & Analysis</title>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Chart.js 4.4.1 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <!-- Application Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon">
+                    <i class="fas fa-heart-pulse"></i>
+                </div>
+                <div>
+                    <div class="brand-title">CommunityHealth</div>
+                    <div class="brand-subtitle">Data & Insights</div>
+                </div>
+            </div>
+
+            <ul class="sidebar-menu">
+                <li class="menu-category">Main Dashboard</li>
+                <li class="menu-item {{ 'active' if active_page == 'dashboard' else '' }}">
+                    <a href="{{ url_for('dashboard') }}">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+
+                <li class="menu-category">Data Management</li>
+                <li class="menu-item {{ 'active' if active_page == 'records' else '' }}">
+                    <a href="{{ url_for('records_view') }}">
+                        <i class="fas fa-table-list"></i>
+                        <span>Health Data</span>
+                    </a>
+                </li>
+                <li class="menu-item {{ 'active' if active_page == 'add_record' else '' }}">
+                    <a href="{{ url_for('add_record_view') }}">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Add Record</span>
+                    </a>
+                </li>
+
+                <li class="menu-category">Epidemiology & Reports</li>
+                <li class="menu-item {{ 'active' if active_page == 'analytics' else '' }}">
+                    <a href="{{ url_for('analytics_view') }}">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Analytics</span>
+                    </a>
+                </li>
+                <li class="menu-item {{ 'active' if active_page == 'reports' else '' }}">
+                    <a href="{{ url_for('reports_view') }}">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <span>Reports</span>
+                    </a>
+                </li>
+
+                <li class="menu-category">Documentation</li>
+                <li class="menu-item {{ 'active' if active_page == 'about' else '' }}">
+                    <a href="{{ url_for('about_view') }}">
+                        <i class="fas fa-circle-info"></i>
+                        <span>About Project</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <div class="system-badge">
+                    <div class="status-dot"></div>
+                    <span>SQLite Database Connected</span>
+                </div>
+                <div style="font-size: 0.72rem; color: #64748b;">
+                    v1.0 • Academic Capstone
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <div class="main-wrapper">
+            <!-- Top Sticky Header -->
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="sidebar-toggle-btn" aria-label="Toggle Sidebar Navigation">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="page-breadcrumb">
+                        <span>Community Health</span>
+                        <i class="fas fa-chevron-right" style="font-size: 0.7rem; color: #cbd5e1;"></i>
+                        <span class="current">{% block breadcrumb %}Dashboard{% endblock %}</span>
+                    </div>
+                </div>
+
+                <div class="header-right">
+                    <div class="header-actions">
+                        <a href="{{ url_for('export_csv') }}" class="btn btn-secondary btn-sm" title="Download Full CSV">
+                            <i class="fas fa-file-csv" style="color: #0f766e;"></i>
+                            <span>Export CSV</span>
+                        </a>
+                        <a href="{{ url_for('add_record_view') }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i>
+                            <span>New Entry</span>
+                        </a>
+                        <button onclick="resetSampleData()" class="btn btn-secondary btn-sm" title="Re-populate with realistic sample data">
+                            <i class="fas fa-rotate" style="color: #64748b;"></i>
+                            <span>Reset Data</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content Body -->
+            <main class="page-content">
+                <!-- Flash Notification Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-messages">
+                            {% for category, message in messages %}
+                                <div class="flash-alert flash-{{ category }}">
+                                    <div>
+                                        <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i>
+                                        <span style="margin-left: 6px;">{{ message }}</span>
+                                    </div>
+                                    <button class="flash-close" onclick="this.parentElement.remove()">&times;</button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                {% block content %}{% endblock %}
+            </main>
+
+            <!-- Footer -->
+            <footer class="app-footer">
+                <div>
+                    <strong>Community Health Data Collection & Analysis</strong> — Healthcare Planning Platform
+                </div>
+                <div>
+                    Built with Python Flask, SQLite, and Chart.js • Anonymized Clinical Data
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

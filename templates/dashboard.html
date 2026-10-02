@@ -1,0 +1,275 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{% block breadcrumb %}Overview Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-title-bar">
+    <div class="page-title-box">
+        <h1>Community Health Overview</h1>
+        <p>Comprehensive public health monitoring, chronic disease surveillance, and community metrics.</p>
+    </div>
+    <div class="page-title-actions">
+        <select id="dashboard-location-filter" class="form-select" style="min-width: 200px;">
+            <option value="">All Community Locations</option>
+            {% for loc in locations %}
+                <option value="{{ loc }}">{{ loc }}</option>
+            {% endfor %}
+        </select>
+        <a href="{{ url_for('records_view') }}" class="btn btn-secondary">
+            <i class="fas fa-list"></i> View All Records
+        </a>
+    </div>
+</div>
+
+<!-- Alert Banner: Public Health Insights -->
+<div class="alert-banner">
+    <div class="alert-banner-content">
+        <i class="fas fa-triangle-exclamation alert-banner-icon"></i>
+        <div class="alert-banner-text">
+            <strong>Public Health Surveillance Alert</strong>
+            <p>
+                Screening data indicates a <strong>{{ summary.hypertension_rate }}%</strong> hypertension prevalence rate and 
+                <strong>{{ summary.diabetes_rate }}%</strong> confirmed diabetes cases across 
+                {{ summary.total_records }} community participants. Immediate preventative interventions recommended.
+            </p>
+        </div>
+    </div>
+    <a href="{{ url_for('analytics_view') }}" class="btn btn-sm btn-outline" style="white-space: nowrap;">
+        Explore Trends <i class="fas fa-arrow-right"></i>
+    </a>
+</div>
+
+<!-- KPI Summary Cards Grid -->
+<div class="kpi-grid">
+    <!-- Total Screened -->
+    <div class="kpi-card kpi-primary">
+        <div class="kpi-info">
+            <span class="kpi-label">Total Sample Size</span>
+            <span class="kpi-value">{{ summary.total_records }}</span>
+            <span class="kpi-subtext">
+                <i class="fas fa-check-circle" style="color: var(--status-normal);"></i>
+                Active Community Cohort
+            </span>
+        </div>
+        <div class="kpi-icon-box">
+            <i class="fas fa-users"></i>
+        </div>
+    </div>
+
+    <!-- Average Age -->
+    <div class="kpi-card kpi-info">
+        <div class="kpi-info">
+            <span class="kpi-label">Mean Patient Age</span>
+            <span class="kpi-value">{{ summary.avg_age }} <small style="font-size: 1rem; font-weight: 500;">yrs</small></span>
+            <span class="kpi-subtext">
+                <i class="fas fa-scale-balanced" style="color: var(--status-info);"></i>
+                Adult Population Baseline
+            </span>
+        </div>
+        <div class="kpi-icon-box">
+            <i class="fas fa-calendar-check"></i>
+        </div>
+    </div>
+
+    <!-- Average BMI -->
+    <div class="kpi-card kpi-warning">
+        <div class="kpi-info">
+            <span class="kpi-label">Average BMI</span>
+            <span class="kpi-value">{{ summary.avg_bmi }}</span>
+            <span class="kpi-subtext">
+                <span class="badge {{ 'badge-overweight' if summary.avg_bmi >= 25 else 'badge-normal' }}">
+                    {{ 'Overweight Cohort' if summary.avg_bmi >= 25 else 'Normal Weight' }}
+                </span>
+            </span>
+        </div>
+        <div class="kpi-icon-box">
+            <i class="fas fa-weight-scale"></i>
+        </div>
+    </div>
+
+    <!-- Diabetes Cases -->
+    <div class="kpi-card kpi-danger">
+        <div class="kpi-info">
+            <span class="kpi-label">Diabetes Cases</span>
+            <span class="kpi-value">{{ summary.diabetes_cases }}</span>
+            <span class="kpi-subtext">
+                <span class="badge badge-danger">{{ summary.diabetes_rate }}% Prevalence</span>
+            </span>
+        </div>
+        <div class="kpi-icon-box">
+            <i class="fas fa-droplet"></i>
+        </div>
+    </div>
+
+    <!-- Hypertension Cases -->
+    <div class="kpi-card kpi-danger">
+        <div class="kpi-info">
+            <span class="kpi-label">Hypertension Cases</span>
+            <span class="kpi-value">{{ summary.hypertension_cases }}</span>
+            <span class="kpi-subtext">
+                <span class="badge badge-danger">{{ summary.hypertension_rate }}% Prevalence</span>
+            </span>
+        </div>
+        <div class="kpi-icon-box">
+            <i class="fas fa-heart-crack"></i>
+        </div>
+    </div>
+
+    <!-- High Risk / Optimal Health -->
+    <div class="kpi-card kpi-success">
+        <div class="kpi-info">
+            <span class="kpi-label">Optimal Health</span>
+            <span class="kpi-value">{{ summary.normal_health_cases }}</span>
+            <span class="kpi-subtext">
+                <span class="badge badge-normal">{{ summary.normal_health_rate }}% Zero Comorbidity</span>
+            </span>
+        </div>
+        <div class="kpi-icon-box">
+            <i class="fas fa-shield-heart"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Primary Visualizations Grid (Charts 1 - 6) -->
+<div class="charts-grid">
+    <!-- Chart 1: Diabetes Distribution -->
+    <div class="card chart-card">
+        <div class="card-header">
+            <h3><i class="fas fa-chart-pie"></i> Diabetes Distribution</h3>
+            <span class="badge badge-secondary">Confirmed & Pre-diabetic</span>
+        </div>
+        <div class="card-body">
+            <canvas id="chart-diabetes"></canvas>
+        </div>
+    </div>
+
+    <!-- Chart 2: Hypertension Distribution -->
+    <div class="card chart-card">
+        <div class="card-header">
+            <h3><i class="fas fa-heart-pulse"></i> Hypertension Distribution</h3>
+            <span class="badge badge-secondary">Cardiovascular Status</span>
+        </div>
+        <div class="card-body">
+            <canvas id="chart-hypertension"></canvas>
+        </div>
+    </div>
+
+    <!-- Chart 3: Age Group Distribution -->
+    <div class="card chart-card">
+        <div class="card-header">
+            <h3><i class="fas fa-chart-column"></i> Age Cohort Distribution</h3>
+            <span class="badge badge-secondary">5 Demographic Tiers</span>
+        </div>
+        <div class="card-body">
+            <canvas id="chart-age"></canvas>
+        </div>
+    </div>
+
+    <!-- Chart 4: Gender Distribution -->
+    <div class="card chart-card">
+        <div class="card-header">
+            <h3><i class="fas fa-venus-mars"></i> Gender Breakdown</h3>
+            <span class="badge badge-secondary">Demographics</span>
+        </div>
+        <div class="card-body">
+            <canvas id="chart-gender"></canvas>
+        </div>
+    </div>
+
+    <!-- Chart 5: BMI Category Breakdown -->
+    <div class="card chart-card">
+        <div class="card-header">
+            <h3><i class="fas fa-gauge-simple-high"></i> BMI Category Breakdown</h3>
+            <span class="badge badge-secondary">WHO Criteria</span>
+        </div>
+        <div class="card-body">
+            <canvas id="chart-bmi"></canvas>
+        </div>
+    </div>
+
+    <!-- Chart 6: Blood Pressure Distribution -->
+    <div class="card chart-card">
+        <div class="card-header">
+            <h3><i class="fas fa-stethoscope"></i> Blood Pressure Stages</h3>
+            <span class="badge badge-secondary">AHA/ACC Classification</span>
+        </div>
+        <div class="card-body">
+            <canvas id="chart-bp"></canvas>
+        </div>
+    </div>
+
+    <!-- Chart 7: Location-wise Health Statistics (Full Width) -->
+    <div class="card chart-card chart-full-width">
+        <div class="card-header">
+            <h3><i class="fas fa-map-location-dot"></i> Location-Wise Disease Burden</h3>
+            <span class="badge badge-secondary">Comparative Chronic Conditions by Area</span>
+        </div>
+        <div class="card-body" style="min-height: 320px;">
+            <canvas id="chart-location"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Screened Records Preview -->
+<div class="card" style="margin-top: 1.5rem;">
+    <div class="card-header">
+        <h3><i class="fas fa-clock-rotate-left"></i> Recently Screened Community Members</h3>
+        <a href="{{ url_for('records_view') }}" class="btn btn-outline btn-sm">
+            View All Records <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Record ID</th>
+                        <th>Age</th>
+                        <th>Gender</th>
+                        <th>Location</th>
+                        <th>BMI</th>
+                        <th>Blood Pressure</th>
+                        <th>Fasting Glucose</th>
+                        <th>Diabetes</th>
+                        <th>Hypertension</th>
+                        <th>Risk Tier</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in recent_records %}
+                    <tr>
+                        <td><strong>{{ r.record_code }}</strong></td>
+                        <td>{{ r.age }} yrs</td>
+                        <td>{{ r.gender }}</td>
+                        <td><i class="fas fa-map-marker-alt" style="color:var(--primary); font-size:0.8rem; margin-right:4px;"></i>{{ r.location }}</td>
+                        <td>{{ r.bmi }} <span class="badge badge-secondary">{{ r.bmi_category }}</span></td>
+                        <td>{{ r.systolic_bp }}/{{ r.diastolic_bp }} mmHg</td>
+                        <td>{{ r.blood_glucose }} mg/dL</td>
+                        <td>
+                            <span class="badge {{ 'badge-danger' if r.diabetes == 'Yes' else 'badge-warning' if r.diabetes == 'Pre-diabetic' else 'badge-normal' }}">
+                                {{ r.diabetes }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge {{ 'badge-danger' if r.hypertension == 'Yes' else 'badge-normal' }}">
+                                {{ r.hypertension }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge {{ 'badge-high' if r.risk_score == 'High' else 'badge-moderate' if r.risk_score == 'Moderate' else 'badge-low' }}">
+                                {{ r.risk_score }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
